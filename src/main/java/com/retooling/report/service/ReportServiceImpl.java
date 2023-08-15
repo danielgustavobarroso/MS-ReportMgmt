@@ -33,6 +33,15 @@ public class ReportServiceImpl implements ReportService {
 
 	@Value("${api.microservice.use-date-simulator}")
 	private boolean useDateSimulator;
+
+	@Value("${report.path}")
+	private String reportPath;
+
+	@Value("${report.file.name}")
+	private String reportFileName;
+	
+	@Value("${report.file.extension}")
+	private String reportFileExtension;
 	
 	@Override
 	public CurrentStatusReport getCurrentStatusReport(String id) throws CurrentStatusReportException {
@@ -92,7 +101,7 @@ public class ReportServiceImpl implements ReportService {
 
 		String fileSuffix = new SimpleDateFormat("yyyyMMddHHmmss").format(fileDate);
 		
-		File file = new File("reportes/situacion_actual_" + fileSuffix +".txt");
+		File file = new File(reportPath + "/" + reportFileName + "_" + fileSuffix + "." + reportFileExtension);
 		
 		FileWriter fw = new FileWriter(file);
 		
