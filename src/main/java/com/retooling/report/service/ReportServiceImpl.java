@@ -111,7 +111,7 @@ public class ReportServiceImpl implements ReportService {
 		pw.println("----------------------------------------");
 		pw.println("Nombre: " + csf.getFarmName());
 		pw.println();
-		pw.println("Dinero disponible: " + csf.getFarmMoney());
+		pw.println("Dinero disponible ($): " + csf.getFarmMoney());
 		pw.println();
 		pw.println("Límite de huevos: " + csf.getEggLimit());
 		pw.println();
