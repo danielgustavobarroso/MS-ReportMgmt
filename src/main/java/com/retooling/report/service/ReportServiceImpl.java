@@ -6,7 +6,6 @@ import java.io.IOException;
 import java.io.PrintWriter;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
@@ -15,13 +14,11 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
-import org.springframework.web.client.HttpClientErrorException;
 
 import com.retooling.report.entity.Chicken;
 import com.retooling.report.entity.CurrentStatusReport;
 import com.retooling.report.entity.Egg;
 import com.retooling.report.entity.Farm;
-import com.retooling.report.exception.CurrentStatusReportException;
 
 @Service
 public class ReportServiceImpl implements ReportService {
@@ -30,9 +27,6 @@ public class ReportServiceImpl implements ReportService {
 	
 	@Autowired
 	private ApiCall apiCall;
-
-	@Value("${api.microservice.use-date-simulator}")
-	private boolean useDateSimulator;
 
 	@Value("${report.path}")
 	private String reportPath;
@@ -44,34 +38,15 @@ public class ReportServiceImpl implements ReportService {
 	private String reportFileExtension;
 	
 	@Override
-	public CurrentStatusReport getCurrentStatusReport(String id) throws CurrentStatusReportException {
-		logger.info("Iniciando servicio getCurrentStatusReport...");
+	public CurrentStatusReport getCurrentStatusReport(String id) {
+		logger.info("Service - Llamando a método getCurrentStatusReport...");
 		CurrentStatusReport currentStatusReport = new CurrentStatusReport();
 		
-		Farm farm = null;
-		try {
-			farm = apiCall.getFarm(id);
-		} catch (Exception ex) {
-			throw new CurrentStatusReportException("Error in ms-farm microservice");
-		}
+		Farm farm = apiCall.getFarm(id);
 
-		List<Egg> eggs = null;
-		try {
-			eggs = apiCall.getEggs(id);
-		} catch (HttpClientErrorException.NotFound ex) {
-			eggs = new ArrayList<>();
-		} catch (Exception ex) {
-			throw new CurrentStatusReportException("Error in ms-egg microservice");
-		}
-				
-		List<Chicken> chickens = null;
-		try {
-			chickens = apiCall.getChickens(id);
-		} catch (HttpClientErrorException.NotFound ex) {
-			chickens = new ArrayList<>();
-		} catch (Exception ex) {
-			throw new CurrentStatusReportException("Error in ms-chicken microservice");
-		}
+		List<Egg> eggs = apiCall.getEggs(id);
+		
+		List<Chicken> chickens = apiCall.getChickens(id);
 			
 		currentStatusReport.setFarmId(farm.getFarmId());
 		currentStatusReport.setFarmName(farm.getName());
@@ -85,19 +60,14 @@ public class ReportServiceImpl implements ReportService {
 	
 	@Override
 	public String generateFile(String id) throws IOException, ParseException {
-		logger.info("Iniciando servicio generateFile...");
+		logger.info("Service - Llamando a método generateFile...");
 		
 		CurrentStatusReport csf = new CurrentStatusReport();
 		csf = this.getCurrentStatusReport(id);
 		
 		logger.info("Escribiendo el reporte de situación actual...");
 	
-		Date fileDate;
-		if (useDateSimulator) {
-			fileDate = apiCall.getDate();
-		} else {
-			fileDate = new Date();
-		}
+		Date fileDate = apiCall.getDate();
 
 		String fileSuffix = new SimpleDateFormat("yyyyMMddHHmmss").format(fileDate);
 		
@@ -107,6 +77,15 @@ public class ReportServiceImpl implements ReportService {
 		
 		PrintWriter pw = new PrintWriter(fw);
 		
+		writeInFile(pw, csf);
+		
+		pw.close();
+		
+		logger.info("Generación de archivo OK");
+		return "Generación de archivo OK";
+	}
+	
+	private void writeInFile(PrintWriter pw, CurrentStatusReport csf) {
 		pw.println("Reporte de Situación Actual de la Granja");
 		pw.println("----------------------------------------");
 		pw.println("Nombre: " + csf.getFarmName());
@@ -128,10 +107,6 @@ public class ReportServiceImpl implements ReportService {
 		if (csf.getChickenLimit() == csf.getChickensCount()) {
 			pw.println("SE HA ALCANZADO EL LIMITE DE GALLINAS!");		
 		}
-		pw.close();
-		
-		logger.info("Generación de archivo OK");
-		return "Generación de archivo OK";
 	}
 	
 }

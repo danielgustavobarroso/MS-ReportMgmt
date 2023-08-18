@@ -4,11 +4,10 @@ import java.io.IOException;
 import java.text.ParseException;
 
 import com.retooling.report.entity.CurrentStatusReport;
-import com.retooling.report.exception.CurrentStatusReportException;
 
 public interface ReportService {
 
-	public CurrentStatusReport getCurrentStatusReport(String id) throws CurrentStatusReportException;
+	public CurrentStatusReport getCurrentStatusReport(String id);
 	
 	public String generateFile(String id) throws IOException, ParseException;
 	

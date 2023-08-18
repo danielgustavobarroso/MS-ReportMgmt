@@ -16,7 +16,6 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.retooling.report.entity.CurrentStatusReport;
-import com.retooling.report.exception.CurrentStatusReportException;
 import com.retooling.report.service.ReportService;
 
 @RestController
@@ -30,7 +29,7 @@ public class ReportController {
 	
 	//Obtener reporte por id de granja
 	@GetMapping("reports/currentStatusReport/{id}")
-	public ResponseEntity<CurrentStatusReport> createCurrentStatusReport(@PathVariable("id") String id) throws CurrentStatusReportException {
+	public ResponseEntity<CurrentStatusReport> createCurrentStatusReport(@PathVariable("id") String id) {
 		logger.info("Iniciando servicio createCurrentStatusReport...");
 		return new ResponseEntity<>(service.getCurrentStatusReport(id), HttpStatus.OK);
 	}
